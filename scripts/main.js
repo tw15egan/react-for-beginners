@@ -20,6 +20,10 @@ var App = React.createClass({
       order: {}
     }
   },
+  addToOrder: function(key) {
+    this.state.order[key] = this.state.order[key] + 1 || 1;
+    this.setState({ order: this.state.order });
+  },
   addFish: function(fish) {
     var timestamp = new Date().getTime();
     
@@ -34,7 +38,7 @@ var App = React.createClass({
     });
   },
   renderFish: function(key) {
-    return <Fish key={key} index={key} details={this.state.fishes[key]} />
+    return <Fish key={key} index={key} details={this.state.fishes[key]} addToOrder={this.addToOrder} />
   },
   render: function() {
     return (
@@ -56,8 +60,16 @@ var App = React.createClass({
   Fish
 */
 var Fish = React.createClass({
+  onButtonClick: function(e) {
+    e.preventDefault();
+    var key = this.props.index;
+    console.log("Going to add the fish: " + key);
+    this.props.addToOrder(key)
+  },
   render: function() {
     var details = this.props.details;
+    var isAvailable = (details.status === 'available' ?  true : false);
+    var buttonText = (isAvailable ? 'Add To Order' : 'Sold Out!');
     return (
       <li className="menu-fish">
         <img src={details.image} alt={details.name} />
@@ -65,7 +77,8 @@ var Fish = React.createClass({
           <span className="price">{h.formatPrice(details.price)}</span>
         </h3>
         <p>{details.desc}</p>
-        </li>
+        <button disabled={!isAvailable} onClick={this.onButtonClick}>{buttonText}</button>
+      </li>
     )
   }
 })
@@ -96,8 +109,8 @@ var AddFishForm = React.createClass({
         <input type="text" ref="name" placeholder="Fish Name" />
         <input type="text" ref="price" placeholder="Fish Price" />
         <select ref="status">
-          <option value="availible">Fresh!</option>
-          <option value="unavailible">Sold Out!</option>
+          <option value="available">Fresh!</option>
+          <option value="unavailable">Sold Out!</option>
         </select>
         <textarea type="text" ref="desc" placeholder="Desc"></textarea>
         <input type="text" ref="image" placeholder="URL to Image" />
